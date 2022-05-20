@@ -20,7 +20,7 @@ router.route('/')
     .get(commentController.findAll)
     .post(commentController.create);
 
-router.route('/:projectID')
+router.route('/:commentID')
     .get(commentController.findOne)
     .put(commentController.update)
     .delete(commentController.delete);

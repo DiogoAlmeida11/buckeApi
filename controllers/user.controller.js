@@ -3,6 +3,7 @@ const User = db.user;
 
 //necessary for LIKE operator
 const { Op, ValidationError } = require('sequelize');
+const { user } = require("../models/index.js");
 
 // function to map default response to desired response data structure
 // {
@@ -148,7 +149,7 @@ exports.update = async (req, res) => {
             });
             
         // obtains only a single entry from the table, using the provided primary key
-        let affectedRows = await User.update(req.body, { where: { id: req.params.UserID } })
+        let affectedRows = await User.update(req.body, { where: { id: req.params.userID } })
 
         if (affectedRows[0] === 0) // check if the tutorial was updated (returns [0] if no data was updated)
             return res.status(200).json({

@@ -3,8 +3,30 @@ const Comment = db.comment;
 
 //necessary for LIKE operator
 const { Op, ValidationError } = require('sequelize');
+const { comment } = require("../models/index.js");
 
+// function to map default response to desired response data structure
+// {
+//     "totalItems": 8,
+//     "tutorials": [...],
+//     "totalPages": 3,
+//     "currentPage": 1
+// }
+const getPagingData = (data, page, limit) => {
+    // data Sequelize Model method findAndCountAll function has the form
+    // {
+    //     count: 5,
+    //     rows: [
+    //              tutorial {...}
+    //         ]
+    // }
+    const totalItems = data.count;
+    const comments = data.rows;
+    const currentPage = page;
+    const totalPages = Math.ceil(totalItems / limit);
 
+    return { totalItems, comments, totalPages, currentPage };
+};
 
 // Display list of all users (with pagination)
 exports.findAll = async (req, res) => {
@@ -58,53 +80,89 @@ exports.findAll = async (req, res) => {
 
 exports.findOne = async (req, res) => {
     try {
-        res.status(201).json({ message: "Comment found with the correct id"})
+        let comment = await Comment.findByPk(req.params.commentID)
+
+         if (comment === null)
+            res.status(404).json({
+                success: false, msg: `Cannot find any comment with ID ${req.params.commentID}.`
+            });
+        else
+            res.json({ success: true, comment: comment });
     }
     catch (err) {
-        if (err.titulo === 'SequelizeValidationError')
-        res.status(400).json({ message: err.errors || "Bad request!" });
-    else
-        res.status(500).json({ message: err.message || "Some error occurred while finding the comment!" })
-        
-    }
+        res.status(500).json({
+            success: false, msg: `Error retrieving comment with ID ${req.params.commentID}.`
+        });
+    };
 };
 
 // Handle user create on POST
 exports.create = async (req, res) => {
+    // no need validation
+
     try {
-        res.status(201).json({ message: "New comment created", location: "/comments" + req.params.id})
+        let newComment = await Comment.creat(req.body);
+        res.status(201).json({ success: true, msg:"New comment created", URL: `/user/${newComment.id}` })
     }
     catch (err) {
-        if (err.titulo === 'SequelizeValidationError')
-        res.status(400).json({ message: err.errors || "Bad request!" });
-    else
-        res.status(500).json({ message: err.message || "Some error occurred while creating the comment!" })
-        
-    }
+        // console.log(err.name) // err.name === 'SequelizeValidationError'
+        if (err instanceof ValidationError)
+            res.status(400).json({ success: false, msg: err.errors.map(e => e.message) });
+        else
+            res.status(500).json({
+                success: false, msg: err.message || "Some error occurred while creating the comment."
+            });
+    };
 };
 
 exports.update = async (req, res) => {
     try {
-        res.status(200).json({ message: "Comment " + req.params.id + " altered" })
+        // since Sequelize update() does not distinguish if a tutorial exists, first let's try to find one
+        let comment = await Comment.findByPk(req.params.commentID);
+        if (comment === null)
+            return res.status(404).json({
+                success: false, msg: `Cannot find any comment with ID ${req.params.commentID}.`
+            });
+            
+        // obtains only a single entry from the table, using the provided primary key
+        let affectedRows = await Comment.update(req.body, { where: { id: req.params.commentID } })
+
+        if (affectedRows[0] === 0) // check if the tutorial was updated (returns [0] if no data was updated)
+            return res.status(200).json({
+                success: true, msg: `No updates were made on comment with ID ${req.params.commentID}.`
+            });
+
+        res.json({
+            success: true,
+            msg: `Comment with ID ${req.params.commentID} was updated successfully.`
+        });
     }
     catch (err) {
-        if (err.desc === 'SequelizeValidationError')
-        res.status(404).json({ message: err.errors || "Not found!" });
-    else
-        res.status(500).json({ message: err.message || "Some error occurred while updating the comment!" })
-        
-    }
+        if (err instanceof ValidationError)
+            return res.status(400).json({ success: false, msg: err.errors.map(e => e.message) });
+        res.status(500).json({
+            success: false, msg: `Error retrieving user with ID ${req.params.commentID}.`
+        });
+    };
 };
 
 exports.delete = async (req, res) => {
     try {
-        res.status(204).json({ message: "Annoucement id " + req.params.id + " was deleted." })
+        let result = await Comment.destroy({ where: { id: req.params.commentID } })
+        // console.log(result)
+        if (result == 1) // the promise returns the number of deleted rows
+            return res.status(200).json({
+                success: true, msg: `Comment with id ${req.params.commentID} was successfully deleted!`
+            });
+        // no rows deleted -> no tutorial was found
+        res.status(404).json({
+            success: false, msg: `Cannot find any comment with ID ${req.params.commentID}.`
+        });
     }
     catch (err) {
-        if (err.desc === 'SequelizeValidationError')
-        res.status(404).json({ message: err.errors || "Not found!"});
-    else
-        res.status(500).json({ message: err.message || "Some error occurred while deleting the comment!" })
-        
-    }
+        console.log(err)
+        res.status(500).json({
+            success: false, msg: `Error deleting comment with ID ${req.params.commentID}.`
+        });
+    };
 };

@@ -20,7 +20,7 @@ router.route('/')
     .get(annoucementController.findAll)
     .post(annoucementController.create);
 
-router.route('/:projectID')
+router.route('/:annoucementID')
     .get(annoucementController.findOne)
     .put(annoucementController.update)
     .delete(annoucementController.delete);

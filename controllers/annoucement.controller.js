@@ -3,9 +3,30 @@ const Annoucement = db.annoucement;
 
 //necessary for LIKE operator
 const { Op, ValidationError } = require('sequelize');
-const { user } = require("../models/index.js");
+const { annoucement } = require("../models/index.js");
 
+// function to map default response to desired response data structure
+// {
+//     "totalItems": 8,
+//     "tutorials": [...],
+//     "totalPages": 3,
+//     "currentPage": 1
+// }
+const getPagingData = (data, page, limit) => {
+    // data Sequelize Model method findAndCountAll function has the form
+    // {
+    //     count: 5,
+    //     rows: [
+    //              tutorial {...}
+    //         ]
+    // }
+    const totalItems = data.count;
+    const annoucements = data.rows;
+    const currentPage = page;
+    const totalPages = Math.ceil(totalItems / limit);
 
+    return { totalItems, annoucements, totalPages, currentPage };
+};
 
 // Display list of all users (with pagination)
 exports.findAll = async (req, res) => {
@@ -59,54 +80,90 @@ exports.findAll = async (req, res) => {
 
 exports.findOne = async (req, res) => {
     try {
-        res.status(201).json({ message: "Annoucement found with the correct id"})
+        let annoucement = await Annoucement.findByPk(req.params.annoucementID)
+
+         if (annoucement === null)
+            res.status(404).json({
+                success: false, msg: `Cannot find any annoucement with ID ${req.params.annoucementID}.`
+            });
+        else
+            res.json({ success: true, annoucement: annoucement });
     }
     catch (err) {
-        if (err.titulo === 'SequelizeValidationError')
-        res.status(400).json({ message: err.errors || "Bad request!" });
-    else
-        res.status(500).json({ message: err.message || "Some error occurred while finding the anoucement id!" })
-        
-    }
+        res.status(500).json({
+            success: false, msg: `Error retrieving annoucement with ID ${req.params.annoucementID}.`
+        });
+    };
 };
 
 // Handle user create on POST
 exports.create = async (req, res) => {
+    // no need validation
+
     try {
-        res.status(201).json({ message: "New annoucement created", location: "/annoucents" + req.params.id})
+        let newAnnoucement = await Annoucement.create(req.body);
+        res.status(201).json({ success: true, msg:"New annoucement created", URL: `/user/${newAnnoucement.id}` })
     }
     catch (err) {
-        if (err.titulo === 'SequelizeValidationError')
-        res.status(400).json({ message: err.errors || "Bad request!" });
-    else
-        res.status(500).json({ message: err.message || "Some error occurred while creating the activity!" })
-        
-    }
+        // console.log(err.name) // err.name === 'SequelizeValidationError'
+        if (err instanceof ValidationError)
+            res.status(400).json({ success: false, msg: err.errors.map(e => e.message) });
+        else
+            res.status(500).json({
+                success: false, msg: err.message || "Some error occurred while creating the annoucement."
+            });
+    };
 };
 
 exports.update = async (req, res) => {
     try {
-        res.status(200).json({ message: "Annoucement " + req.params.id + " altered" })
+        // since Sequelize update() does not distinguish if a tutorial exists, first let's try to find one
+        let annoucement = await Annoucement.findByPk(req.params.annoucementID);
+        if (annoucement === null)
+            return res.status(404).json({
+                success: false, msg: `Cannot find any annoucement with ID ${req.params.annoucementID}.`
+            });
+            
+        // obtains only a single entry from the table, using the provided primary key
+        let affectedRows = await Annoucement.update(req.body, { where: { id: req.params.annoucementID } })
+
+        if (affectedRows[0] === 0) // check if the tutorial was updated (returns [0] if no data was updated)
+            return res.status(200).json({
+                success: true, msg: `No updates were made on annoucement with ID ${req.params.annoucementID}.`
+            });
+
+        res.json({
+            success: true,
+            msg: `Annoucement with ID ${req.params.annoucementID} was updated successfully.`
+        });
     }
     catch (err) {
-        if (err.titulo === 'SequelizeValidationError')
-        res.status(404).json({ message: err.errors || "Not found!" });
-    else
-        res.status(500).json({ message: err.message || "Some error occurred while updating the activity!" })
-        
-    }
+        if (err instanceof ValidationError)
+            return res.status(400).json({ success: false, msg: err.errors.map(e => e.message) });
+        res.status(500).json({
+            success: false, msg: `Error retrieving annoucement with ID ${req.params.annoucementID}.`
+        });
+    };
 };
 
 exports.delete = async (req, res) => {
     try {
-        res.status(204).json({ message: "Annoucement id " + req.params.id + " was deleted." })
+        let result = await Annoucement.destroy({ where: { id: req.params.annoucementID } })
+        // console.log(result)
+        if (result == 1) // the promise returns the number of deleted rows
+            return res.status(200).json({
+                success: true, msg: `Annoucement with id ${req.params.annoucementID} was successfully deleted!`
+            });
+        // no rows deleted -> no tutorial was found
+        res.status(404).json({
+            success: false, msg: `Cannot find any annoucement with ID ${req.params.annoucementID}.`
+        });
     }
     catch (err) {
-        if (err.titulo === 'SequelizeValidationError')
-        res.status(404).json({ message: err.errors || "Not found!" });
-    else
-        res.status(500).json({ message: err.message || "Some error occurred while creating the activity!" })
-        
-    }
+        console.log(err)
+        res.status(500).json({
+            success: false, msg: `Error deleting annoucement with ID ${req.params.annoucementID}.`
+        });
+    };
 };
 
