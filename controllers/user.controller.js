@@ -59,7 +59,7 @@ exports.findAll = async (req, res) => {
 
     try {
         let users = await User.findAndCountAll({ where: condition, limit, offset })
-        
+
         // map default response to desired response data structure
         res.status(200).json({
             success: true,
@@ -78,6 +78,18 @@ exports.findAll = async (req, res) => {
 
 // Handle user create on POST
 exports.create = async (req, res) => {
+    let user
+
+    if (req.body.email_utilizador) {
+        user = await User.findOne(
+            { where: { email_utilizador: req.body.email_utilizador } }
+        );
+    }
+
+    if (user && req.params.userID != user.id)
+        return res.status(400).json({ message: "Email already associated with an account!" });
+
+
     try {
         // Save Tutorial in the database
         let newUser = await User.create(req.body);
@@ -115,6 +127,18 @@ exports.findOne = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
+    let user
+
+    if (req.body.email_utilizador) {
+        user = await User.findOne(
+            { where: { email_utilizador: req.body.email_utilizador } }
+        );
+    }
+
+    if (user && req.params.userID != user.id)
+        return res.status(400).json({ message: "Email already associated with an account!" });
+
+
     try {
         // since Sequelize update() does not distinguish if a tutorial exists, first let's try to find one
         let user = await User.findByPk(req.params.userID);
@@ -122,7 +146,7 @@ exports.update = async (req, res) => {
             return res.status(404).json({
                 success: false, msg: `Cannot find any user with ID ${req.params.userID}.`
             });
-
+            
         // obtains only a single entry from the table, using the provided primary key
         let affectedRows = await User.update(req.body, { where: { id: req.params.UserID } })
 

@@ -87,21 +87,21 @@ db.fav_userannoucement.belongsTo(db.user);
 db.category.hasMany(db.annoucement);
 db.annoucement.belongsTo(db.category);
 //1:M
-db.annoucement_type.hasMany(db.annoucement);
-db.annoucement.belongsTo(db.annoucement_type);
+db.annoucement_type.hasMany(db.annoucement, {foreingKey: 'id_tipo'});
+db.annoucement.belongsTo(db.annoucement_type, {foreingKey: 'id_tipo'});
 
 //projects
 //1:M
-db.project.hasMany(db.project_comment);
-db.project_comment.belongsTo(db.project);
+db.project.hasMany(db.project_comment, {foreingKey: 'id_projeto'});
+db.project_comment.belongsTo(db.project, {foreingKey: 'id_projeto'});
 
 //comments
 //1:M
-db.comment.hasMany(db.user_comment);
-db.user_comment.belongsTo(db.comment);
+db.comment.hasMany(db.user_comment, {foreingKey: 'id_comentario'});
+db.user_comment.belongsTo(db.comment, {foreingKey: 'id_comentario'});
 //1:M
-db.comment.hasMany(db.project_comment);
-db.project_comment.belongsTo(db.comment);
+db.comment.hasMany(db.project_comment, {foreingKey: 'id_comentario'});
+db.project_comment.belongsTo(db.comment, {foreingKey: 'id_comentario'});
 
 
 // optionally: SYNC
