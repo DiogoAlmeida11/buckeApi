@@ -56,7 +56,7 @@ exports.findAll = async (req, res) => {
     // console.log(`Limit ${limit} Offset ${offset}`)
 
     // search by title require to build a query with the operator L
-    const condition = titulo ? { nome: { [Op.like]: `%${titulo}%` } } : null;
+    const condition = titulo ? { titulo: { [Op.like]: `%${titulo}%` } } : null;
 
     try {
         let projects = await Project.findAndCountAll({ where: condition, limit, offset })
@@ -102,8 +102,8 @@ exports.create = async (req, res) => {
     // no need validation
 
     try {
-        let newProject = await Project.creat(req.body);
-        res.status(201).json({ success: true, msg:"New project created", URL: `/user/${newProject.id}` })
+        let newProject = await Project.create(req.body);
+        res.status(201).json({ success: true, msg:"New project created", URL: `/projects/${newProject.id}` })
     }
     catch (err) {
         // console.log(err.name) // err.name === 'SequelizeValidationError'

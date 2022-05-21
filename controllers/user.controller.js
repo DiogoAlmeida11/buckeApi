@@ -94,7 +94,7 @@ exports.create = async (req, res) => {
     try {
         // Save Tutorial in the database
         let newUser = await User.create(req.body);
-        res.status(201).json({ success: true, msg: "New user created.", URL: `/user/${newUser.id}` });
+        res.status(201).json({ success: true, msg: "New user created.", URL: `/users/${newUser.id}` });
     }
     catch (err) {
         // console.log(err.name) // err.name === 'SequelizeValidationError'

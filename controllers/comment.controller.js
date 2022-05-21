@@ -101,8 +101,8 @@ exports.create = async (req, res) => {
     // no need validation
 
     try {
-        let newComment = await Comment.creat(req.body);
-        res.status(201).json({ success: true, msg:"New comment created", URL: `/user/${newComment.id}` })
+        let newComment = await Comment.create(req.body);
+        res.status(201).json({ success: true, msg:"New comment created", URL: `/comments/${newComment.id}` })
     }
     catch (err) {
         // console.log(err.name) // err.name === 'SequelizeValidationError'
@@ -141,7 +141,7 @@ exports.update = async (req, res) => {
         if (err instanceof ValidationError)
             return res.status(400).json({ success: false, msg: err.errors.map(e => e.message) });
         res.status(500).json({
-            success: false, msg: `Error retrieving user with ID ${req.params.commentID}.`
+            success: false, msg: `Error retrieving comment with ID ${req.params.commentID}.`
         });
     };
 };
