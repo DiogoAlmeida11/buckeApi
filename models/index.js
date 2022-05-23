@@ -66,9 +66,6 @@ db.user.belongsTo(db.course);
 //1:M
 db.user.hasMany(db.annoucement);
 db.annoucement.belongsTo(db.user);
-//1:M
-db.gender.hasMany(db.user);
-db.user.belongsTo(db.gender);
 //N:M
 db.user.belongsToMany(db.project, { through: 'UserProjects' });
 db.project.belongsToMany(db.user, { through: 'UserProjects' });
@@ -81,14 +78,6 @@ db.fav_userproject.belongsTo(db.user);
 //1:M
 db.user.hasMany(db.fav_userannoucement);
 db.fav_userannoucement.belongsTo(db.user);
-
-//annoucements
-//1:M
-db.category.hasMany(db.annoucement);
-db.annoucement.belongsTo(db.category);
-//1:M
-db.annoucement_type.hasMany(db.annoucement, {foreingKey: 'id_tipo'});
-db.annoucement.belongsTo(db.annoucement_type, {foreingKey: 'id_tipo'});
 
 //projects
 //1:M
