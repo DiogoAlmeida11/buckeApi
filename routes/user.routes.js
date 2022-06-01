@@ -1,6 +1,8 @@
 const express = require('express');
 
 const userController = require("../controllers/user.controller");
+const authController = require("../controllers/Auth.controller");
+
 
 // express router
 let router = express.Router();
@@ -17,13 +19,13 @@ router.use((req, res, next) => {
 })
 
 router.route('/')
-    .get(userController.findAll)
-    .post(userController.create);
+    .get(authController.verifyToken, authController.isAdmin, userController.findAll)
+    .post(authController.verifyToken, authController.isAdmin, userController.create);
 
 router.route('/:userID')
-    .get(userController.findOne)
-    .put(userController.update)
-    .delete(userController.delete);
+    .get(authController.verifyToken, authController.isAdminOrLoggedUser, userController.findOne)
+    .put(authController.verifyToken,authController.isAdminOrLoggedUser, userController.update)
+    .delete(authController.verifyToken, authController.isAdminOrLoggedUser, userController.delete);
 
 router.all('*', function (req, res) {
     //send an predefined error message 

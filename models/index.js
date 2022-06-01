@@ -35,6 +35,8 @@ db.sequelize = sequelize;
 
 //export User model
 db.user = require("./user.model.js")(sequelize, DataTypes);
+//export User_type model
+db.user_type = require("./user_type.model.js")(sequelize, DataTypes);
 //export Project model
 db.project = require("./project.model.js")(sequelize, DataTypes);
 //export Annoucement model
@@ -43,14 +45,8 @@ db.annoucement = require("./annoucement.model.js")(sequelize, DataTypes);
 db.comment = require("./comment.model.js")(sequelize, DataTypes);
 //export Curso model
 db.course = require("./course.model.js")(sequelize, DataTypes);
-//export Annoucement_type model
-db.annoucement_type = require("./annoucement_type.model.js")(sequelize, DataTypes);
 //export User_comment model
 db.user_comment = require("./user_comment.model.js")(sequelize, DataTypes);
-//export Gender model
-db.gender = require("./gender.model.js")(sequelize, DataTypes);
-//export Category
-db.category = require("./category.model.js")(sequelize, DataTypes);
 // export project_comment
 db.project_comment = require("./project_comment.model.js")(sequelize, DataTypes);
 //export fav_userproject
@@ -60,6 +56,9 @@ db.fav_userannoucement = require("./fav_userannoucement.model.js")(sequelize, Da
 //define relationships
 
 //users
+
+db.user_type.hasMany(db.user);
+db.user.belongsTo(db.user_type)
 //1:M
 db.course.hasMany(db.user);
 db.user.belongsTo(db.course);

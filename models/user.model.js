@@ -15,11 +15,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: { notNull: { msg: "Surname can not be empty or null!" } }
         },
-        /*password:{
+        password:{
             type: DataTypes.STRING,
             allowNull: false,
             validate: { notNull: { msg: "Password can not be empty or null!" } }
-        }*/
+        }
     }, {
         timestamps: false
     });

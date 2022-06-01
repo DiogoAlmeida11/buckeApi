@@ -26,6 +26,11 @@ app.use('/annoucements', require('./routes/annoucement.routes.js'))
 // routing middleware (mounted on /tutorials route)
 app.use('/comments', require('./routes/comment.routes.js'))
 
+// routing middleware (mounted on /tutorials route)
+app.use('/auth', require('./routes/auth.routes.js'))
+
+
+
 // handle invalid routes
 app.get('*', function (req, res) {
 	res.status(404).json({ message: 'WHAT???' });
