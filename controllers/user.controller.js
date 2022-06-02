@@ -94,7 +94,13 @@ exports.create = async (req, res) => {
 
     try {
         // Save Tutorial in the database
-        let newUser = await User.create(req.body);
+        let newUser = await User.create({
+            email_utilizador: req.body.email_utilizador,
+            nome: req.body.nome,
+            sobrenome: req.body.sobrenome,
+            password: bcrypt.hashSync(req.body.password, 10),
+            role :"Student"
+        });
         res.status(201).json({ success: true, msg: "New user created.", URL: `/users
         /${newUser.id}` });
     }

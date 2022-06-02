@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const config = require("../config/auth.config.js");
 const db = require("../models");
 const User = db.user;
+const Course = db.course;
 const UserType = db.user_type;
 
 
@@ -14,25 +15,30 @@ exports.signup = async (req, res) => {
         if (user)
             return res.status(400).json({ message: "Email already associated with account!" });
 
+        let course = await Course.findOne(
+          { where: { descricao_curso: req.body.descricao_curso } }
+      );
         // save User to database
         user = await User.create({
             email_utilizador: req.body.email_utilizador,
             password: bcrypt.hashSync(req.body.password, 10), // generates hash to password
             nome: req.body.nome,
             sobrenome: req.body.sobrenome,
+            role: "Student",
+            courseId : course.id
         });
-        if (req.body.user_type) {
-            let user_type = await UserType.findOne({ where: { type: req.body.user_type } });
-            if (user_type) {
-                if (user_type.type === "Admin") {
-                    await User.update({ userTypeId: 1 }, { where: { id: user.id } })
-                } else if (user_type.type === "Association") {
-                    await User.update({ userTypeId: 3 }, { where: { id: user.id } })
-                }
-            }
-        }
-        else
-            await User.update({ userTypeId: 2 }, { where: { id: user.id } })
+        // if (req.body.user_type) {
+        //     let user_type = await UserType.findOne({ where: { type: req.body.user_type } });
+        //     if (user_type) {
+        //         if (user_type.type === "Admin") {
+        //             await User.update({ userTypeId: 1 }, { where: { id: user.id } })
+        //         } else if (user_type.type === "Association") {
+        //             await User.update({ userTypeId: 3 }, { where: { id: user.id } })
+        //         }
+        //     }
+        // }
+        // else
+        //     await User.update({ userTypeId: 2 }, { where: { id: user.id } })
         return res.json({ message: "User was registered successfully!" });
     }
     catch (err) {
