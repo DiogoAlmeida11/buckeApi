@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const config = require("../config/auth.config.js");
 const db = require("../models");
 const User = db.user;
-const User_type = db.user_type;
+const UserType = db.user_type;
 
 
 exports.signup = async (req, res) => {
@@ -20,20 +20,19 @@ exports.signup = async (req, res) => {
             password: bcrypt.hashSync(req.body.password, 10), // generates hash to password
             nome: req.body.nome,
             sobrenome: req.body.sobrenome,
-            courseID: 1,
         });
         if (req.body.user_type) {
-            let user_type = await User_type.findOne({ where: { type: req.body.user_type } });
+            let user_type = await UserType.findOne({ where: { type: req.body.user_type } });
             if (user_type) {
                 if (user_type.type === "Admin") {
-                    await User.update({ id_type: 1 }, { where: { id: user.id } })
+                    await User.update({ userTypeId: 1 }, { where: { id: user.id } })
                 } else if (user_type.type === "Association") {
-                    await User.update({ id_type: 3 }, { where: { id: user.id } })
+                    await User.update({ userTypeId: 3 }, { where: { id: user.id } })
                 }
             }
         }
         else
-            await User.update({ id_type: 2 }, { where: { id: user.id } })
+            await User.update({ userTypeId: 2 }, { where: { id: user.id } })
         return res.json({ message: "User was registered successfully!" });
     }
     catch (err) {
@@ -61,7 +60,7 @@ exports.signin = async (req, res) => {
         const token = jwt.sign({ id: user.id }, config.secret, {
             expiresIn: 86400 // 24 hours
         });
-        let user_type = await User_type.findOne({ where: { id: user.id_type } });
+        let user_type = await UserType.findOne({ where: { id: user.userTypeId } });
         return res.status(200).json({
             id: user.id, email_utilizador: user.email_utilizador,
             email_utilizador: user.email_utilizador, nome: user.nome, user_type: user_type.type.toUpperCase(), accessToken: token
@@ -88,7 +87,7 @@ exports.verifyToken = (req, res, next) => {
 
 exports.isAdmin = async (req, res, next) => {
     let user = await User.findByPk(req.loggedUserId);
-    let user_type = await User_type.findOne({ where: { id: user.id_type } });
+    let user_type = await UserType.findOne({ where: { id: user.userTypeId } });
     if (user_type.type === "Admin")
     {
         next();
@@ -101,7 +100,7 @@ exports.isAdmin = async (req, res, next) => {
 
 exports.isAdminOrLoggedUser = async (req, res, next) => {
     let user = await User.findByPk(req.loggedUserId);
-    let user_type = await User_type.findOne({ where: { id: user.id_type } });
+    let user_type = await UserType.findOne({ where: { id: user.userTypeId } });
     if (user_type.type === "Admin" || (user.id == req.params.userID)){
         next();
     }else{
@@ -114,7 +113,7 @@ exports.isAdminOrLoggedUser = async (req, res, next) => {
 
 exports.isAssociation = async (req, res, next) => {
     let user = await User.findByPk(req.loggedUserId);
-    let user_type = await User_type.findOne({ where: { id: user.id_type } });
+    let user_type = await UserType.findOne({ where: { id: user.userID } });
     if (user_type.type === "Association" || user_type.type === "Admin")
     {
         next();
