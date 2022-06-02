@@ -19,13 +19,13 @@ router.use((req, res, next) => {
 })
 
 router.route('/')
-    .get(authController.verifyToken, authController.isAdmin, userController.findAll)
-    .post(authController.verifyToken, authController.isAdmin, userController.create);
+    .get(authController.verifyToken, userController.findAll)
+    .post(authController.verifyToken, userController.create);
 
 router.route('/:userID')
-    .get(authController.verifyToken, authController.isAdminOrLoggedUser, userController.findOne)
-    .put(authController.verifyToken,authController.isAdminOrLoggedUser, userController.update)
-    .delete(authController.verifyToken, authController.isAdminOrLoggedUser, userController.delete);
+    .get(authController.verifyToken, userController.findOne)
+    .put(authController.verifyToken, userController.update)
+    .delete(authController.verifyToken, userController.delete);
 
 router.all('*', function (req, res) {
     //send an predefined error message 

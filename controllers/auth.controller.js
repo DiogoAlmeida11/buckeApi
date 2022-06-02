@@ -42,49 +42,56 @@ exports.signup = async (req, res) => {
 
 exports.signin = async (req, res) => {
     try {
-
-        let user = await User.findOne({ where: { email_utilizador: req.body.email_utilizador } });
-        if (!user) return res.status(404).json({ message: "Username or password invalid!" });
-
-        // tests a string (password in body) against a hash (password in database)
-        const passwordIsValid = bcrypt.compareSync(
-            req.body.password, user.password
-        );
-        if (!passwordIsValid) {
-            return res.status(401).json({
-                accessToken: null, message: "Username or password invalid!"
-            });
-        }
-
-        // sign the given payload (user ID) into a JWT payload – builds JWT token, using secret key
-        const token = jwt.sign({ id: user.id }, config.secret, {
-            expiresIn: 86400 // 24 hours
+      if (!req.body || !req.body.email_utilizador || !req.body.password)
+        return res
+          .status(400)
+          .json({ success: false, msg: "Must provide username and password." });
+      let user = await User.findOne({ where: { email_utilizador: req.body.email_utilizador } }); //get user data from DB
+      if (!user)
+        return res.status(404).json({ success: false, msg: "User not found." });
+      // tests a string (password in body) against a hash (password in database)
+      const check = bcrypt.compareSync(req.body.password, user.password);
+      if (!check)
+        return res.status(401).json({
+          success: false,
+          accessToken: null,
+          msg: "Invalid credentials!",
         });
-        let user_type = await UserType.findOne({ where: { id: user.userTypeId } });
-        return res.status(200).json({
-            id: user.id, email_utilizador: user.email_utilizador,
-            email_utilizador: user.email_utilizador, nome: user.nome, user_type: user_type.type.toUpperCase(), accessToken: token
-        });
-    } catch (err) { res.status(500).json({ message: err.message }); };
-};
-
-exports.verifyToken = (req, res, next) => {
-    let token = req.headers["x-access-token"];
-    if (!token) {
-        return res.status(403).send({
-            message: "No token provided!"
+      // sign the given payload (user ID and role) into a JWT payload – builds JWT token, using secret key
+      const token = jwt.sign({ id: user.id, role: user.userTypeId }, config.secret, {
+        expiresIn: "24h", // 24 hours
+      });
+      return res.status(200).json({ success: true, accessToken: token });
+    } catch (err) {
+      if (err instanceof ValidationError)
+        res
+          .status(400)
+          .json({ success: false, msg: err.errors.map((e) => e.message) });
+      else
+        res.status(500).json({
+          success: false,
+          msg: err.message || "Some error occurred at login.",
         });
     }
-    // verify request token given the JWT secret key
-    jwt.verify(token, config.secret, (err, decoded) => {
-        if (err) {
-            return res.status(401).send({ message: "Unauthorized!" });
-        }
-        req.loggedUserId = decoded.id; // save user ID for future verifications
-        next();
-    });
-};
+  };
 
+exports.verifyToken = (req, res, next) => {
+    // search token in headers most commonly used for authorization
+    const header = req.headers["x-access-token"] || req.headers.authorization;
+    if (typeof header == "undefined")
+      return res.status(401).json({ success: false, msg: "No token provided!" });
+    const bearer = header.split(" "); // Authorization: Bearer <token>
+    const token = bearer[1];
+    try {
+      let decoded = jwt.verify(token, config.secret);
+      req.loggedUserId = decoded.id; // save user ID and role into request object
+      req.loggedUserRole = decoded.role;
+      next();
+    } catch (err) {
+      return res.status(401).json({ success: false, msg: "Unauthorized!" });
+    }
+  };
+  
 exports.isAdmin = async (req, res, next) => {
     let user = await User.findByPk(req.loggedUserId);
     let user_type = await UserType.findOne({ where: { id: user.userTypeId } });

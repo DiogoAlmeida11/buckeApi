@@ -1,7 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
     const UserType = sequelize.define("user_type", {
         type: {
-            type: DataTypes.STRING
+            type: DataTypes.STRING,
+            defaultValue: "regular"
         }
     },
         {

@@ -19,7 +19,17 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
             validate: { notNull: { msg: "Password can not be empty or null!" } }
-        }
+        },
+        /*role: {
+            type: DataTypes.ENUM("Admin", "Student", "Association"),
+            defaultValue: "Student",
+            validate: {
+              isIn: {
+                args: [["Admin", "Regular", "Association"]],
+                msg: "Allowed roles: admin, regular or association",
+              },
+            },
+          },*/
     }, {
         timestamps: false
     });
