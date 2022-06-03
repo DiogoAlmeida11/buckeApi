@@ -35,8 +35,7 @@ db.sequelize = sequelize;
 
 //export User model
 db.user = require("./user.model.js")(sequelize, DataTypes);
-//export User_type model
-db.user_type = require("./userType.model.js")(sequelize, DataTypes);
+
 //export Project model
 db.project = require("./project.model.js")(sequelize, DataTypes);
 //export Annoucement model
@@ -57,8 +56,6 @@ db.fav_userannoucement = require("./fav_userannoucement.model.js")(sequelize, Da
 
 //users
 
-db.user_type.hasMany(db.user, {foreignKey: 'id'});
-db.user.belongsTo(db.user_type, {foreignKey: 'id'})
 //1:M
 db.course.hasMany(db.user);
 db.user.belongsTo(db.course);

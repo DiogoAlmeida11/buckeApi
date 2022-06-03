@@ -4,7 +4,6 @@ const config = require("../config/auth.config.js");
 const db = require("../models");
 const User = db.user;
 const Course = db.course;
-const UserType = db.user_type;
 
 
 exports.signup = async (req, res) => {
@@ -18,6 +17,7 @@ exports.signup = async (req, res) => {
         let course = await Course.findOne(
           { where: { descricao_curso: req.body.descricao_curso } }
       );
+
         // save User to database
         user = await User.create({
             email_utilizador: req.body.email_utilizador,
