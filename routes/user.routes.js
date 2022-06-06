@@ -23,7 +23,7 @@ router.route('/')
     .post(authController.verifyToken, userController.create);
 
 router.route('/:userID')
-    .get(authController.verifyToken, userController.findOne)
+    .get(/*authController.verifyToken,*/ userController.findOne)
     .put(authController.verifyToken, userController.update)
     .delete(authController.verifyToken, userController.delete);
 

@@ -22,13 +22,10 @@ module.exports = (sequelize, DataTypes) => {
         },
         role: {
             type: DataTypes.STRING,
-            // validate: {
-            //   isIn: {
-            //     args: [["Admin", "Regular", "Association"]],
-            //     msg: "Allowed roles: admin, regular or association",
-            //   },
-            // },
-          },
+        },
+        img : {
+            type: DataTypes.STRING,
+        }
     }, {
         timestamps: false
     });

@@ -61,7 +61,7 @@ exports.findAll = async (req, res) => {
 
     try {
         let users = await User.findAndCountAll({ where: condition, limit, offset })
-
+        console.log(users);
         // map default response to desired response data structure
         res.status(200).json({
             success: true,
@@ -99,7 +99,7 @@ exports.create = async (req, res) => {
             nome: req.body.nome,
             sobrenome: req.body.sobrenome,
             password: bcrypt.hashSync(req.body.password, 10),
-            role :"Student"
+            role :"Student",
         });
         res.status(201).json({ success: true, msg: "New user created.", URL: `/users
         /${newUser.id}` });
@@ -123,14 +123,14 @@ exports.findOne = async (req, res) => {
 
         if (user === null)
             res.status(404).json({
-                success: false, msg: `Cannot find any user with ID ${req.params.userID}.`
+                success: false, message: `Cannot find any user with ID ${req.params.userID}.`
             });
         else
             res.json({ success: true, user: user });
     }
     catch (err) {
         res.status(500).json({
-            success: false, msg: `Error retrieving user with ID ${req.params.userID}.`
+            success: false, message: `Error retrieving user with ID ${req.params.userID}.`
         });
     };
 };
