@@ -27,6 +27,7 @@ exports.signup = async (req, res) => {
       courseId: course.id,
       img: "https://imagens.mdig.com.br/thbs/45184mn.jpg",
       bgImg: "https://www.solidbackgrounds.com/images/2048x1536/2048x1536-powder-blue-web-solid-color-background.jpg",
+      descricao:"",
       date:new Date().getFullYear()+'-'+(new Date().getMonth()+1)+'-'+(new Date().getDate())
       
     });

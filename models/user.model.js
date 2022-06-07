@@ -43,6 +43,9 @@ module.exports = (sequelize, DataTypes) => {
         },
         date:{
             type:DataTypes.DATEONLY
+        },
+        descricao:{ 
+           type: DataTypes.STRING
         }
     }, {
         timestamps: false
